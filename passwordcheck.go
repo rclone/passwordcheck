@@ -101,6 +101,9 @@ func readConfigFile(in io.Reader) (pws map[int][]passEntry) {
 			remote = line[1 : len(line)-1]
 			continue
 		}
+		if strings.Contains(line, "RCLONE_ENCRYPT") {
+			log.Fatalf("Can't read encrypted config files - please decrypt first")
+		}
 		if !strings.HasPrefix(line, "pass") {
 			continue
 		}
@@ -261,6 +264,9 @@ func main() {
 	}
 	pwsMap := readConfigFile(in)
 	_ = in.Close()
+	if len(pwsMap) == 0 {
+		log.Fatalf("No passwords found in config file - did you use the right file?")
+	}
 
 	pws := findAllPasswords(startSeed, endSeed, pwsMap)
 
